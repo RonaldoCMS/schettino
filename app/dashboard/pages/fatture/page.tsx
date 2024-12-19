@@ -30,14 +30,13 @@ const FattureScreen: React.FC = () => {
     );
 
     // Logica per la visibilità delle Card
-    const isMobile = window.innerWidth <= 768;
-
+ 
     return (
         <div>
             <Title level={2}>Tutte le Fatture</Title>
 
             {/* Mostra le Card su dispositivi mobili */}
-            {isMobile ? (
+            <div className="md:hidden"> 
                 <Row gutter={[16, 16]}>
                     {fattureData.map((fattura, index) => (
                         <Col xs={24} sm={12} md={8} key={index}>
@@ -51,10 +50,13 @@ const FattureScreen: React.FC = () => {
                         </Col>
                     ))}
                 </Row>
-            ) : (
-                // Mostra la Table su schermi più grandi
+                </div>
+
+            {/* Mostra la tabella su desktop */}
+            <div className="hidden md:block">
                 <Table dataSource={fattureData} columns={columns} rowKey="codice" />
-            )}
+             </div>
+             
         </div>
     );
 };
