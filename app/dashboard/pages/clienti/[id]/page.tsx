@@ -4,13 +4,13 @@ import { Table, Button, Typography, Card, Col } from "antd";
 import { useParams } from "next/navigation";
 import { useClienti } from "@/context/ClientiContext";
 import CreaFatturaModal from "@/components/crea_fattura";
- 
+
 const { Title } = Typography;
 
 const ClienteDettaglio: React.FC = () => {
     const { id } = useParams();
     const { clienti } = useClienti();
-    const cliente = clienti.find(c => c.id === parseInt(id || "0"));
+    const cliente = clienti.find(c => c.id === parseInt(Array.isArray(id) ? id[0] : id || "0"));
     const [isModalVisible, setIsModalVisible] = useState(false);
 
     if (!cliente) {
@@ -127,10 +127,10 @@ const ClienteDettaglio: React.FC = () => {
                 }
             </style>
         `;
-    
+
         printWindow?.document.write('<html><head>' + styles + '</head><body>');
         printWindow?.document.write('<h2>Fatture Cliente: ' + cliente.nome + ' ' + cliente.cognome + '</h2>');
-        
+
         // Tabella Fatture
         printWindow?.document.write('<table><tr><th>Codice</th><th>Descrizione</th><th>Costo</th><th>Data Fattura</th><th>Data Inserimento</th></tr>');
         fatture.forEach(fattura => {
@@ -144,9 +144,9 @@ const ClienteDettaglio: React.FC = () => {
                 </tr>
             `);
         });
-    
+
         printWindow?.document.write('</table>');
-    
+
         // Sezione Totali
         printWindow?.document.write(`
             <div class="totals">
@@ -156,20 +156,20 @@ const ClienteDettaglio: React.FC = () => {
                 <p><strong>Saldo Totale:</strong> € ${(totalePositivo + totaleNegativo).toFixed(2)}</p>
             </div>
         `);
-    
+
         // Footer
         printWindow?.document.write(`
             <div class="page-footer">
                 <p>Stampato il: ${new Date().toLocaleString()}</p>
             </div>
         `);
-    
+
         printWindow?.document.write('</body></html>');
         printWindow?.document.close();
         printWindow?.print();
     };
-    
-    
+
+
 
     const columns = [
         { title: "Codice", dataIndex: "codice", key: "codice" },
@@ -180,12 +180,12 @@ const ClienteDettaglio: React.FC = () => {
     ];
 
     return (
-        <div className={styles.container}>
+        <div  >
             <Title level={2}>Dettaglio Cliente: {cliente.nome} {cliente.cognome}</Title>
-            
+
             {/* Totali */}
-            <Card className={styles.card}>
-                <div className={styles.totali}>
+            <Card  >
+                <div  >
                     <p><strong>Totale Fatture Positive: </strong>€ {totalePositivo.toFixed(2)}</p>
                     <p><strong>Totale Fatture Negative: </strong>€ {totaleNegativo.toFixed(2)}</p>
                     <p><strong>Saldo Totale: </strong>€ {(totalePositivo + totaleNegativo).toFixed(2)}</p>
@@ -218,11 +218,11 @@ const ClienteDettaglio: React.FC = () => {
                 ))}
             </div>
             {/* Tasti di azione */}
-            <div className={styles.buttons}>
-                <Button type="primary" onClick={() => setIsModalVisible(true)} className={styles.button}>
+            <div  >
+                <Button type="primary" onClick={() => setIsModalVisible(true)}  >
                     Aggiungi Fattura
                 </Button>
-                <Button type="default" onClick={handleStampaFatture} style={{ marginLeft: '10px' }} className={styles.button}>
+                <Button type="default" onClick={handleStampaFatture} style={{ marginLeft: '10px' }}  >
                     Stampa Fatture
                 </Button>
             </div>
