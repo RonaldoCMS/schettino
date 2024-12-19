@@ -1,0 +1,22 @@
+/* style.css */
+
+/* Card visibile su schermi mobili */
+.card {
+    display: block; /* Per dispositivi mobili, la card è visibile */
+}
+
+/* Tabella visibile su schermi web */
+.table {
+    display: none; /* Nascondi la tabella su dispositivi mobili */
+}
+
+/* Nascondi la card per schermi più grandi */
+@media (min-width: 768px) {
+    .card {
+        display: none; /* Nascondi la card su schermi web */
+    }
+
+    .table {
+        display: block; /* Mostra la tabella su schermi web */
+    }
+}
