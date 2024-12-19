@@ -4,8 +4,7 @@ import { Table, Button, Typography, Card, Col } from "antd";
 import { useParams } from "next/navigation";
 import { useClienti } from "@/context/ClientiContext";
 import CreaFatturaModal from "@/components/crea_fattura";
-import styles from './style.css';
-
+ 
 const { Title } = Typography;
 
 const ClienteDettaglio: React.FC = () => {
