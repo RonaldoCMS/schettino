@@ -1,234 +1,107 @@
 "use client";
 import React, { useState } from "react";
-import { Table, Button, Typography, Card, Col } from "antd";
+import { Table, Button, Typography, Card, Col, Input, Row } from "antd";
 import { useParams } from "next/navigation";
 import { useClienti } from "@/context/ClientiContext";
-import CreaFatturaModal from "@/components/crea_fattura";
+import CreaPagamentoModal from "@/components/crea_pagamento";
+import handleStampapagamenti from "@/utils/print_pagamento_cliente";
 
 const { Title } = Typography;
+const { Search } = Input;
 
 const ClienteDettaglio: React.FC = () => {
     const { id } = useParams();
     const { clienti } = useClienti();
     const cliente = clienti.find(c => c.id === parseInt(Array.isArray(id) ? id[0] : id || "0"));
     const [isModalVisible, setIsModalVisible] = useState(false);
+    const [searchText, setSearchText] = useState("");
 
     if (!cliente) {
         return <div>Cliente non trovato</div>;
     }
 
     // Calcolo dei totali (con protezione per valori non numerici)
-    const fatture = cliente.fatture;
-    const totalePositivo: number = fatture.reduce((acc, fattura) => fattura.costo > 0 ? acc + (Number(fattura.costo) || 0) : acc, 0);
-    const totaleNegativo: number = fatture.reduce((acc, fattura) => fattura.costo < 0 ? acc + (Number(fattura.costo) || 0) : acc, 0);
+    const pagamenti = cliente.pagamenti;
+    const totalePositivo: number = pagamenti.reduce((acc, pagamento) => pagamento.costo > 0 ? acc + (Number(pagamento.costo) || 0) : acc, 0);
+    const totaleNegativo: number = pagamenti.reduce((acc, pagamento) => pagamento.costo < 0 ? acc + (Number(pagamento.costo) || 0) : acc, 0);
 
-    // Funzione di stampa
-    const handleStampaFatture = () => {
-        const printWindow = window.open('', '', 'width=800, height=600');
-        const styles = `
-            <style>
-                body {
-                    font-family: 'Arial', sans-serif;
-                    margin: 40px;
-                    color: #333;
-                    background-color: #fafafa;
-                }
-                h2 {
-                    text-align: center;
-                    color: #fff;
-                    background-color: #0066cc;
-                    padding: 15px;
-                    border-radius: 8px;
-                    margin-bottom: 30px;
-                    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-                }
-                .header {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 20px;
-                }
-                .logo {
-                    width: 50px;
-                    height: 50px;
-                    margin-right: 10px;
-                }
-                table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 20px;
-                    border-radius: 8px;
-                    overflow: hidden;
-                    border: 1px solid #ddd;
-                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-                }
-                th, td {
-                    padding: 12px 15px;
-                    text-align: left;
-                    border: 1px solid #ddd;
-                }
-                th {
-                    background-color: #0066cc;
-                    color: white;
-                    font-weight: bold;
-                }
-                tr:nth-child(even) {
-                    background-color: #f9f9f9;
-                }
-                tr:nth-child(odd) {
-                    background-color: #ffffff;
-                }
-                tr:hover {
-                    background-color: #e1e1e1;
-                }
-                td {
-                    font-size: 14px;
-                    color: #333;
-                }
-                .totals {
-                    margin-top: 40px;
-                    text-align: right;
-                    background-color: #ffffff;
-                    padding: 20px;
-                    border-radius: 8px;
-                    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-                    border-top: 3px solid #0066cc;
-                }
-                .totals p {
-                    font-size: 16px;
-                    font-weight: bold;
-                    color: #333;
-                    margin: 10px 0;
-                }
-                .totals p span {
-                    font-weight: normal;
-                    color: #555;
-                }
-                .total-header {
-                    font-size: 20px;
-                    font-weight: bold;
-                    margin-bottom: 20px;
-                    color: #0066cc;
-                }
-                .page-footer {
-                    text-align: center;
-                    margin-top: 40px;
-                    font-size: 12px;
-                    color: #777;
-                }
-                @media print {
-                    body {
-                        margin: 0;
-                        padding: 0;
-                    }
-                    .totals {
-                        page-break-before: always;
-                    }
-                }
-            </style>
-        `;
-
-        printWindow?.document.write('<html><head>' + styles + '</head><body>');
-        printWindow?.document.write('<h2>Fatture Cliente: ' + cliente.nome + ' ' + cliente.cognome + '</h2>');
-
-        // Tabella Fatture
-        printWindow?.document.write('<table><tr><th>Codice</th><th>Descrizione</th><th>Costo</th><th>Data Fattura</th><th>Data Inserimento</th></tr>');
-        fatture.forEach(fattura => {
-            printWindow?.document.write(`
-                <tr>
-                    <td>${fattura.codice}</td>
-                    <td>${fattura.descrizione}</td>
-                    <td>${fattura.costo}</td>
-                    <td>${fattura.dataFattura}</td>
-                    <td>${fattura.dataInserimento}</td>
-                </tr>
-            `);
-        });
-
-        printWindow?.document.write('</table>');
-
-        // Sezione Totali
-        printWindow?.document.write(`
-            <div class="totals">
-                <div class="total-header">Riepilogo Totale Fatture</div>
-                <p><strong>Totale Fatture Positive:</strong> € ${totalePositivo.toFixed(2)}</p>
-                <p><strong>Totale Fatture Negative:</strong> € ${totaleNegativo.toFixed(2)}</p>
-                <p><strong>Saldo Totale:</strong> € ${(totalePositivo + totaleNegativo).toFixed(2)}</p>
-            </div>
-        `);
-
-        // Footer
-        printWindow?.document.write(`
-            <div class="page-footer">
-                <p>Stampato il: ${new Date().toLocaleString()}</p>
-            </div>
-        `);
-
-        printWindow?.document.write('</body></html>');
-        printWindow?.document.close();
-        printWindow?.print();
-    };
-
-
+    // Filtro per la ricerca
+    const filteredPagamenti = pagamenti.filter(pagamento =>
+        Object.values(pagamento).some(value =>
+            String(value).toLowerCase().includes(searchText.toLowerCase())
+        )
+    );
 
     const columns = [
         { title: "Codice", dataIndex: "codice", key: "codice" },
         { title: "Descrizione", dataIndex: "descrizione", key: "descrizione" },
         { title: "Costo", dataIndex: "costo", key: "costo" },
-        { title: "Data Fattura", dataIndex: "dataFattura", key: "dataFattura" },
+        { title: "Data pagamento", dataIndex: "dataPagamento", key: "dataPagamento" },
+        { title: "Tipo pagamento", dataIndex: "metodoPagamento", key: "metodoPagamento" },
         { title: "Data Inserimento", dataIndex: "dataInserimento", key: "dataInserimento" },
     ];
 
     return (
-        <div  >
+        <div>
             <Title level={2}>Dettaglio Cliente: {cliente.nome} {cliente.cognome}</Title>
 
             {/* Totali */}
-            <Card  >
-                <div  >
-                    <p><strong>Totale Fatture Positive: </strong>€ {totalePositivo.toFixed(2)}</p>
-                    <p><strong>Totale Fatture Negative: </strong>€ {totaleNegativo.toFixed(2)}</p>
-                    <p><strong>Saldo Totale: </strong>€ {(totalePositivo + totaleNegativo).toFixed(2)}</p>
+            <Card style={{ marginBottom: "20px" }}>
+                <div>
+                    <p><strong>Totale pagamenti Positive: </strong>€ {totalePositivo}</p>
+                    <p><strong>Totale pagamenti Negative: </strong>€ {totaleNegativo}</p>
+                    <p><strong>Saldo Totale: </strong>€ {(totalePositivo + totaleNegativo)}</p>
                 </div>
             </Card>
 
-            {/* Tabella delle fatture */}
+            {/* Ricerca */}
+            <Row style={{ marginBottom: "20px" }}>
+                <Col span={24}>
+                    <Search
+                        placeholder="Cerca per qualsiasi campo"
+                        onChange={e => setSearchText(e.target.value)}
+                        enterButton
+                        allowClear
+                    />
+                </Col>
+            </Row>
+
+            {/* Tabella delle pagamenti */}
             <div className="hidden md:block">
                 <Table
-                    dataSource={fatture}
+                    dataSource={filteredPagamenti}
                     columns={columns}
                     rowKey="codice"
-                    pagination={false}
-                    style={{ display: window.innerWidth <= 768 ? 'none' : 'block' }}
+                    pagination={{ pageSize: 10 }}
                 />
             </div>
 
             <div className="md:hidden">
-                {cliente.fatture.map((cliente, key) => (
-                    <Col key={key} span={24} sm={12} md={8}>
+                {filteredPagamenti.map((pagamento, key) => (
+                    <Col key={key} span={24} sm={12} md={8} style={{ marginBottom: "20px" }}>
                         <Card
-                            title={`${cliente.codice} ${cliente.dataFattura}`}
-
-
+                            title={`${pagamento.codice} - ${pagamento.dataPagamento}`}
                         >
-                            <p>Descrizione: {cliente.descrizione}</p>
-                            <p>Saldo {cliente.costo}</p>
+                            <p>Descrizione: {pagamento.descrizione}</p>
+                            <p>Saldo: €{pagamento.costo}</p>
+                            <p>Metodo di pagamento: {pagamento.metodoPagamento}</p>
                         </Card>
                     </Col>
                 ))}
             </div>
+
             {/* Tasti di azione */}
-            <div  >
-                <Button type="primary" onClick={() => setIsModalVisible(true)}  >
-                    Aggiungi Fattura
+            <div style={{ marginTop: "20px" }}>
+                <Button type="primary" onClick={() => setIsModalVisible(true)}>
+                    Aggiungi pagamento
                 </Button>
-                <Button type="default" onClick={handleStampaFatture} style={{ marginLeft: '10px' }}  >
-                    Stampa Fatture
+                <Button type="default" onClick={() => handleStampapagamenti(cliente, pagamenti)} style={{ marginLeft: "10px" }}>
+                    Stampa pagamenti
                 </Button>
             </div>
 
-            {/* Modale per aggiungere una fattura */}
-            <CreaFatturaModal
+            {/* Modale per aggiungere una pagamento */}
+            <CreaPagamentoModal
                 clienteId={cliente.id}
                 visible={isModalVisible}
                 onClose={() => setIsModalVisible(false)}

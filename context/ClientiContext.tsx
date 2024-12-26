@@ -1,12 +1,12 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Cliente, Fattura } from "@/model/clienti";
+import { Cliente, Pagamento } from "@/model/clienti";
 
 interface ClientiContextType {
     clienti: Cliente[];
-    aggiungiCliente: (cliente: Omit<Cliente, "id" | "fatture">) => void;
+    aggiungiCliente: (cliente: Omit<Cliente, "id" | "pagamenti">) => void;
     eliminaCliente: (email: string) => void;
-    aggiungiFattura: (clienteId: number, fattura: Omit<Fattura, "dataInserimento">) => void;
+    aggiungiPagamento: (clienteId: number, pagamento: Omit<Pagamento, "dataInserimento">) => void;
 }
 
 const ClientiContext = createContext<ClientiContextType | undefined>(undefined);
@@ -20,9 +20,9 @@ const ClientiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
             setClienti(JSON.parse(storedClienti));
         } else {
             const inizialiClienti: Cliente[] = [
-                { id: 1, nome: "Mario", cognome: "Rossi", email: "mario.rossi@example.com", fatture: [] },
-                { id: 2, nome: "Luigi", cognome: "Verdi", email: "luigi.verdi@example.com", fatture: [] },
-                { id: 3, nome: "Giovanni", cognome: "Bianchi", email: "giovanni.bianchi@example.com", fatture: [] },
+                { id: 1, nome: "Mario", cognome: "Rossi", email: "mario.rossi@example.com", pagamenti: [] },
+                { id: 2, nome: "Luigi", cognome: "Verdi", email: "luigi.verdi@example.com", pagamenti: [] },
+                { id: 3, nome: "Giovanni", cognome: "Bianchi", email: "giovanni.bianchi@example.com", pagamenti: [] },
             ];
             localStorage.setItem("clienti", JSON.stringify(inizialiClienti));
             setClienti(inizialiClienti);
@@ -34,10 +34,10 @@ const ClientiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         setClienti(clientiAggiornati);
     };
 
-    const aggiungiCliente = (cliente: Omit<Cliente, "id" | "fatture">) => {
+    const aggiungiCliente = (cliente: Omit<Cliente, "id" | "pagamenti">) => {
         const nuovoCliente: Cliente = {
             id: clienti.length + 1,
-            fatture: [],
+            pagamenti: [],
             ...cliente,
         };
         salvaClienti([...clienti, nuovoCliente]);
@@ -48,15 +48,15 @@ const ClientiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
         salvaClienti(clientiAggiornati);
     };
 
-    const aggiungiFattura = (clienteId: number, fattura: Omit<Fattura, "dataInserimento">) => {
+    const aggiungiPagamento = (clienteId: number, pagamento: Omit<Pagamento, "dataInserimento">) => {
         const clientiAggiornati = clienti.map(cliente =>
             cliente.id === clienteId
                 ? {
                       ...cliente,
-                      fatture: [
-                          ...cliente.fatture,
+                      pagamenti: [
+                          ...cliente.pagamenti,
                           {
-                              ...fattura,
+                              ...pagamento,
                               dataInserimento: new Date().toISOString(),
                           },
                       ],
@@ -67,7 +67,7 @@ const ClientiProvider: React.FC<{ children: React.ReactNode }> = ({ children }) 
     };
 
     return (
-        <ClientiContext.Provider value={{ clienti, aggiungiCliente, eliminaCliente, aggiungiFattura }}>
+        <ClientiContext.Provider value={{ clienti, aggiungiCliente, eliminaCliente, aggiungiPagamento: aggiungiPagamento }}>
             {children}
         </ClientiContext.Provider>
     );

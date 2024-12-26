@@ -69,20 +69,20 @@ export default function Dashboard() {
                             onMouseLeave={(e) => (e.currentTarget.style.transform = "scale(1)")}
                             cover={
                                 <img
-                                    alt="Fatture"
-                                    src="https://via.placeholder.com/300x200?text=Fatture"
+                                    alt="Pagamenti"
+                                    src="https://via.placeholder.com/300x200?text=Pagamenti"
                                 />
                             }
                         >
-                            <Title level={4}>Tutte le Fatture</Title>
+                            <Title level={4}>Tutti i pagamenti</Title>
                             <Button
                                 type="primary"
                                 icon={<FileTextOutlined />}
-                                onClick={() => handleNavigate("/dashboard/pages/fatture")}
+                                onClick={() => handleNavigate("/dashboard/pages/pagamenti")}
                                 block
                                 style={{ marginTop: 16 }}
                             >
-                                Vai a Fatture
+                                Vai in pagamenti
                             </Button>
                         </Card>
                     </Col>

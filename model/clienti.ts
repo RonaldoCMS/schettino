@@ -3,13 +3,14 @@ export interface Cliente {
     nome: string;
     cognome: string;
     email: string;
-    fatture: Fattura[]; // Aggiunto array di fatture
+    pagamenti: Pagamento[]; // Aggiunto array di pagamenti
 }
 
-export interface Fattura {
+export interface Pagamento {
     codice: string;
     descrizione: string;
     costo: number;
-    dataFattura: string;
+    dataPagamento: string;
     dataInserimento: string;
+    metodoPagamento: "contanti" | "pos"; // Aggiunto tipo di pagamento
 }

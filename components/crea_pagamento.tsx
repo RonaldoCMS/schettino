@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
-import { Button, Modal, Form, Input } from "antd";
-import { Fattura } from "@/model/clienti";
+import { Button, Modal, Form, Input, Select } from "antd";
+import { Pagamento } from "@/model/clienti";
 import { useClienti } from "@/context/ClientiContext";
 
 interface CreaFatturaModalProps {
@@ -11,13 +11,13 @@ interface CreaFatturaModalProps {
 }
 
 const CreaFatturaModal: React.FC<CreaFatturaModalProps> = ({ clienteId, visible, onClose }) => {
-    const { aggiungiFattura } = useClienti();
+    const { aggiungiPagamento: aggiungiPagamento } = useClienti();
     const [form] = Form.useForm(); // Gestisce il form
 
-    const handleAggiungiFattura = (values: Omit<Fattura, "dataInserimento">) => {
+    const handleAggiungiPagamento = (values: Omit<Pagamento, "dataInserimento">) => {
         // Aggiungi la fattura al cliente
-        aggiungiFattura(clienteId, values);
-        
+        aggiungiPagamento(clienteId, values);
+
         // Reset del modulo e chiusura della modale
         form.resetFields();
         onClose();
@@ -25,7 +25,7 @@ const CreaFatturaModal: React.FC<CreaFatturaModalProps> = ({ clienteId, visible,
 
     return (
         <Modal
-            title="Aggiungi Fattura"
+            title="Aggiungi Pagamento"
             open={visible}
             onCancel={() => {
                 form.resetFields(); // Reset dei campi del form quando la modale si chiude
@@ -35,7 +35,7 @@ const CreaFatturaModal: React.FC<CreaFatturaModalProps> = ({ clienteId, visible,
         >
             <Form
                 form={form}
-                onFinish={handleAggiungiFattura}
+                onFinish={handleAggiungiPagamento}
                 layout="vertical"
             >
                 <Form.Item
@@ -60,11 +60,21 @@ const CreaFatturaModal: React.FC<CreaFatturaModalProps> = ({ clienteId, visible,
                     <Input type="number" />
                 </Form.Item>
                 <Form.Item
-                    name="dataFattura"
-                    label="Data Fattura"
+                    name="dataPagamento"
+                    label="Data pagamento"
                     rules={[{ required: true, message: "Campo obbligatorio" }]}
                 >
                     <Input type="date" />
+                </Form.Item>
+                <Form.Item
+                    name="metodoPagamento"
+                    label="Metodo di Pagamento"
+                    rules={[{ required: true, message: "Selezionare un metodo di pagamento" }]}
+                >
+                    <Select placeholder="Seleziona metodo di pagamento">
+                        <Select.Option value="contanti">Contanti</Select.Option>
+                        <Select.Option value="pos">Pos</Select.Option>
+                    </Select>
                 </Form.Item>
                 <Button type="primary" htmlType="submit">
                     Salva
